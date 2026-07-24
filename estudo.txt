@@ -1,0 +1,145 @@
+Serio Ferro
+hurst e vecm
+https://youtu.be/fysGjXl6KRY?t=1864
+
+
+ROTEIRO DE ESTUDOS QUANT
+                                                                    
+1. ESTATÍSTICA BÁSICA & MODELAGEM
+    ├── Regressão Linear Simples (OLS) & Rolling Window
+    └── Filtro de Kalman (State-Space Models)
+
+2. TESTES DE COINTEGRAÇÃO & VALIDAÇÃO (Garantir a Reversão)
+    ├── Teste ADF (Augmented Dickey-Fuller)
+    ├── Teste de Johansen & VECM (Vector Error Correction)
+    ├── Expoente de Hurst (Hurst Exponent)
+    └── Meia-Vida da Reversão (Half-Life de Ornstein-Uhlenbeck)
+
+3. GESTÃO DE SINAL & RISCO
+    ├── Z-Score Dinâmico & Bandas de Bollinger
+    ├── Dimensionamento de Posição pelo Beta (Beta Sizing)
+    └── Métricas de Risco (Drawdown Máximo & Sharpe Ratio)
+
+4. EXECUÇÃO & MERCADO REAL (A Prática)
+    ├── Gestão de Custos (Slippage, Emolumentos B3)
+    └── Leg Risk (Risco de Execução em Duas Pontas)
+
+================================================================================
+          CADERNO DE ESTUDOS: VARIÁVEIS ESTATÍSTICAS PARA PAIR TRADING
+================================================================================
+Ativos: WIN (Mini Índice) x WDO (Mini Dólar)
+Aplicações: OLS, Rolling Window, Filtro de Kalman, Backtesting e MQL5
+================================================================================
+
+--------------------------------------------------------------------------------
+1. VARIÁVEIS DE RELAÇÃO E MODELAGEM (CALCULADAS BARRA A BARRA)
+--------------------------------------------------------------------------------
+
+[BETA (β_t)] - Inclinação / Taxa de Equivalência
+--------------------------------------------------------------------------------
+• O que é: O fator de conversão entre os dois ativos na Regressão (Y = β*X + α).
+• Para que serve: Define a proporção exata de contratos. Responde a: "Para cada
+  1 lote do ativo X, quantos lotes do ativo Y eu devo boletar para ficar neutro?".
+• O que observar:
+  - Deve ser NEGATIVO para WIN x WDO (devido à correlação histórica inversa).
+  - Mudanças muito bruscas em poucas barras indicam instabilidade no modelo.
+  - Se inverter o sinal (ficar positivo), a relação estrutural do par quebrou.
+
+[ALPHA (α_t)] - Intercepto / Nível Base
+--------------------------------------------------------------------------------
+• O que é: O ponto onde a reta da regressão cruza o eixo Y (valor base de Y quando X=0).
+• Para que serve: Ajusta a escala de preços entre o Índice (100k+) e o Dólar (5k+).
+• O que observar: Mudanças bruscas de patamar no Alpha sinalizam que o mercado 
+  mudou de regime de preço (mudança macroeconômica).
+
+[RESÍDUO (ε_t)] - O Spread Em Pontos Reais
+--------------------------------------------------------------------------------
+• O que é: A diferença entre o preço real do WIN e o preço previsto pela reta:
+  Resíduo = WIN_real - (β * WDO + α)
+• Para que serve: Representa o "elástico" esticado. É a distorção física do mercado.
+• O que observar: Medido em pontos reais de WIN. Ajuda a definir stops financeiros 
+  baseados na amplitude máxima recente do resíduo.
+
+[R-QUADRADO (R²)] - Qualidade do Ajuste
+--------------------------------------------------------------------------------
+• O que é: Medida estatística (de 0 a 1 ou 0% a 100%) de quanto o WDO explica 
+  a variação do WIN.
+• Para que serve: Filtro de força do modelo.
+• O que observar:
+  - R² alto (> 0.50): Forte relação entre os ativos no período recente.
+  - R² baixo (< 0.20): Ruído puro. O mercado está se movendo por fatores isolados.
+
+
+--------------------------------------------------------------------------------
+2. VARIÁVEIS DE TOMADA DE DECISÃO E FILTROS DE SEGURANÇA
+--------------------------------------------------------------------------------
+
+[Z-SCORE (Z_t)] - Padronização do Resíduo (VARIÁVEL PRINCIPAL DE DECISÃO)
+--------------------------------------------------------------------------------
+• O que é: O Resíduo medido em quantidade de Desvios Padrões em relação à média:
+  Z-Score = (Resíduo - Média_Móvel_Resíduo) / Desvio_Padrão_Resíduo
+• Para que serve: Gatilho numérico padronizado de compra, venda e zeragem.
+• Regra de Regra de Decisão no Robô:
+  - Z >= +2.0σ : Resíduo esticou demais para CIMA  -> VENDA WIN / VENDA WDO
+  - Z <= -2.0σ : Resíduo esticou demais para BAIXO -> COMPRA WIN / COMPRA WDO
+  - Z cruza 0.0 : Spread voltou ao equilíbrio     -> ZERAR POSIÇÃO (LUCRO)
+
+[ADF p-value] - Teste de Cointegração (Augmented Dickey-Fuller)
+--------------------------------------------------------------------------------
+• O que é: Teste estatístico que verifica se o Resíduo é ESTACIONÁRIO (se ele tem 
+  a propriedade física indestrutível de voltar para a média).
+• Para que serve: Trava de segurança para evitar operar pares sem cointegração.
+• Regra de Decisão:
+  - p-value <= 0.05 : Cointegrado (AUTORIZA O ROBÔ A OPERAR).
+  - p-value > 0.05  : Não-cointegrado (BLOQUEIA NOVAS ENTRADAS).
+
+[EXPOENTE DE HURST (H)] - Memória de Reversão à Média
+--------------------------------------------------------------------------------
+• O que é: Métrica que mede a tendência ou a dinâmica de reversão da série temporal.
+• Para que serve: Confirma se o resíduo está "chicoteando" (revertendo) ou "andando em linha reta".
+• Regra de Decisão:
+  - Hurst < 0.40 : Reversão à Média Forte (CENÁRIO IDEAL PARA PAIR TRADING).
+  - Hurst = 0.50 : Passeio Aleatório (Random Walk / Sem padrão).
+  - Hurst > 0.50 : Mercado em Tendência (NÃO OPERE PAIR TRADING).
+
+[MEIA-VIDA (Half-Life)] - Tempo Estimado de Retorno
+--------------------------------------------------------------------------------
+• O que é: Cálculo baseado no modelo de Ornstein-Uhlenbeck que estima quantas 
+  barras o Resíduo leva para percorrer 50% do caminho de volta à média.
+• Para que serve: Gestão de tempo e custo de oportunidade do capital.
+• Regra de Decisão:
+  - Meia-vida curta (ex: 4 a 12 barras no M15): Trades rápidos e eficientes.
+  - Meia-vida longa (ex: > 30 barras): O capital ficará preso por muito tempo; 
+    risco de levar stop antes de voltar ao zero.
+
+
+--------------------------------------------------------------------------------
+3. ESTRUTURA IDEAL DAS COLUNAS DO DATAFRAME (PYTHON)
+--------------------------------------------------------------------------------
+
+Para acompanhar e salvar em CSV / Banco de Dados a cada nova barra fechada, 
+monte o DataFrame do Pandas com a seguinte estrutura de colunas:
+
+| time | win_close | wdo_close | beta | alpha | r2 | residuo | zscore | adf_pvalue | hurst | halflife |
+
+Exemplo de uso prático no Python:
+df['zscore'] = (df['residuo'] - df['residuo'].rolling(40).mean()) / df['residuo'].rolling(40).std()
+
+
+--------------------------------------------------------------------------------
+4. RESUMO DOS GATILHOS DE EXECUÇÃO DO ROBÔ (MQL5 / PYTHON)
+--------------------------------------------------------------------------------
+
+1. O Robô Checa as Travas:
+   - ADF p-value <= 0.05 ? (SIM)
+   - Hurst < 0.40 ? (SIM)
+   - Meia-vida < Limite Max ? (SIM)
+
+2. O Robô Checa o Gatilho do Z-Score:
+   - Se Z-Score <= -2.0  -> Envia Ordem: COMPRA WIN + COMPRA WDO (Ajustado por Beta)
+   - Se Z-Score >= +2.0  -> Envia Ordem: VENDA WIN  + VENDA WDO  (Ajustado por Beta)
+
+3. O Robô Checa a Zeragem:
+   - Se Posição Aberta e Z-Score cruza o 0.0 -> ZERA AMBAS AS PONTAS.
+   - Se Z-Score atinge Stop (|Z| >= 3.5)     -> ZERA AMBAS AS PONTAS (STOP LOSS).
+================================================================================
