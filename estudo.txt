@@ -2,6 +2,7 @@ Serio Ferro
 hurst e vecm
 https://youtu.be/fysGjXl6KRY?t=1864
 
+EWMA
 
 ROTEIRO DE ESTUDOS QUANT
                                                                     
@@ -23,6 +24,7 @@ ROTEIRO DE ESTUDOS QUANT
 4. EXECUÇÃO & MERCADO REAL (A Prática)
     ├── Gestão de Custos (Slippage, Emolumentos B3)
     └── Leg Risk (Risco de Execução em Duas Pontas)
+
 
 ================================================================================
           CADERNO DE ESTUDOS: VARIÁVEIS ESTATÍSTICAS PARA PAIR TRADING

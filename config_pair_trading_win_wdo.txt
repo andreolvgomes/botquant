@@ -1,0 +1,111 @@
+CONFIGURAÇÃO SUGERIDA - PAIR TRADING WIN/WDO
+=============================================
+
+Timeframes:
+- M5
+- M15
+
+Método              M5                  M15                 Observação
+---------------------------------------------------------------------------
+Kalman (warmup)     500 candles         300~500 candles     Precisa aprender α e β
+Kalman (online)     1 candle            1 candle            Atualiza sempre
+ADF                 250 candles         150~250 candles     Valida regime atual
+Hurst               1000 candles        500~1000 candles    Mais lento
+Half-Life           500 candles         300~500 candles     Velocidade de reversão
+Z-Score             100~250 candles      50~150 candles      Entrada operacional
+
+CONFIGURAÇÃO INICIAL RECOMENDADA
+=================================
+
+M5:
+
+KALMAN_WARMUP       = 500
+ADF_WINDOW          = 250
+HURST_WINDOW        = 1000
+HALFLIFE_WINDOW     = 500
+ZSCORE_WINDOW       = 120
+
+
+M15:
+
+KALMAN_WARMUP       = 400
+ADF_WINDOW          = 200
+HURST_WINDOW        = 500
+HALFLIFE_WINDOW     = 400
+ZSCORE_WINDOW       = 100
+
+
+FLUXO DA ESTRATÉGIA
+===================
+
+1. Kalman
+   - Calcula Alpha e Beta dinâmicos
+   - Atualização candle a candle
+   - Responsável pelo hedge ratio
+
+
+2. ADF
+   - Verifica se o resíduo atual continua estacionário
+   - Usar janela móvel
+   - Evitar usar histórico inteiro
+
+
+3. Hurst
+   - Mede tendência ou reversão à média
+   - Usar janela maior
+   - Atualização mais lenta
+
+
+4. Half-Life
+   - Mede tempo esperado de retorno do spread
+   - Usado para validar se vale operar
+
+
+5. Z-Score
+   - Gera entrada e saída
+   - Usar somente resíduo calculado pelo Kalman
+
+
+MODELO OPERACIONAL
+==================
+
+M15:
+- Define se o par está saudável
+- Filtro de regime
+
+
+M5:
+- Executa entrada
+- Calcula Z-Score
+- Controle da operação
+
+
+ORDEM DOS FILTROS
+=================
+
+1 - Kalman atualizado
+        |
+        v
+2 - Beta estável
+        |
+        v
+3 - ADF aprovado
+        |
+        v
+4 - Half-Life aceitável
+        |
+        v
+5 - Hurst favorável
+        |
+        v
+6 - Z-Score extremo
+        |
+        v
+Entrada
+
+
+OBSERVAÇÃO:
+O ADF não deve ser usado sozinho.
+Para WIN/WDO, a estabilidade do Beta do Kalman
+e o comportamento recente do resíduo são filtros
+mais importantes que o ADF histórico.
