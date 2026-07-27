@@ -10,8 +10,8 @@ Método              M5                  M15                 Observação
 Kalman (warmup)     1000 candles        500~700 candles     Precisa aprender α e β
 Kalman (online)     1 candle            1 candle            Atualiza sempre
 ADF                 250 candles         150~250 candles     Valida regime atual
-Hurst               1000 candles        500~1000 candles    Mais lento
-Half-Life           500 candles         300~500 candles     Velocidade de reversão
+Hurst               500–1000 candles    300–700 candles    Mais lento
+Half-Life           250–500 candles     200–400 candles     Velocidade de reversão
 Z-Score             100~250 candles     50~150 candles      Entrada operacional
 VECM                500~1000            300~700             Reestima todo o modelo
 
